@@ -32,6 +32,7 @@ __pyspark = None
 __tf = None
 __K = None
 __ipywidgets = None
+__torch = None
 
 
 def _check_imported():
@@ -61,6 +62,9 @@ def _check_imported():
     if 'ipywidgets' in sys.modules:
         import ipywidgets as __ipywidgets
 
+    if 'torch' in sys.modules:
+        import torch as __torch
+
 
 def _jupyterlab_variableinspector_getsizeof(x):
     if type(x).__name__ in ['ndarray', 'Series']:
@@ -71,6 +75,8 @@ def _jupyterlab_variableinspector_getsizeof(x):
         return "?"
     elif __pd and type(x).__name__ == 'DataFrame':
         return x.memory_usage().sum()
+    elif __torch and isinstance(x, __torch.Tensor):
+        return x.element_size() * x.nelement()
     else:
         return sys.getsizeof(x)
 
@@ -95,6 +101,10 @@ def _jupyterlab_variableinspector_getshapeof(x):
         return "%s" % len(x)
     if isinstance(x, dict):
         return "%s keys" % len(x)
+    if isinstance(x, __torch.Tensor):
+        shape = " x ".join([str(i) for i in x.shape])
+        return "%s" % shape
+
     return None
 
 
